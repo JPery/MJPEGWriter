@@ -46,7 +46,7 @@ MJPEGWriter::Listener()
                 }
             }
         }
-        usleep(40000);
+        usleep(10);
     }
 }
 
@@ -87,8 +87,8 @@ MJPEGWriter::Writer()
             pthread_join(threads[count-1], NULL);
             delete payloads.at(count-1);
         }
-        usleep(40000);
         frame.release();
+        usleep(40000);
     }
 }
 
@@ -97,15 +97,16 @@ MJPEGWriter::ClientWrite(clientFrame & cf)
 {
     stringstream head;
     head << "--mjpegstream\r\nContent-Type: image/jpeg\r\nContent-Length: " << cf.outlen << "\r\n\r\n";
-    _write(cf.client,(char*) head.str().c_str(), 0);
+    char* c_head = (char*) head.str().c_str();
+    pthread_mutex_lock(&mutex_client);
+    _write(cf.client, c_head, 0);
     int n = _write(cf.client, (char*)(cf.outbuf), cf.outlen);
     if (n < cf.outlen)
     {
-        pthread_mutex_lock(&mutex_client);
         cerr << "kill client " << cf.client << endl;
         clients.erase(std::remove(clients.begin(), clients.end(), cf.client));
         ::shutdown(cf.client, 2);
-        pthread_mutex_unlock(&mutex_client);
     }
+    pthread_mutex_unlock(&mutex_client);
     pthread_exit(NULL);
 }
