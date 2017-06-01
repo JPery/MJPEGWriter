@@ -55,10 +55,6 @@ MJPEGWriter::Writer()
 {
     while (this->isOpened())
     {
-        Mat frame;
-        pthread_mutex_lock(&mutex_writer);
-        frame = lastFrame.clone();
-        pthread_mutex_unlock(&mutex_writer);
         pthread_t threads[NUM_CONNECTIONS];
         int count = 0;
 
@@ -66,7 +62,9 @@ MJPEGWriter::Writer()
         std::vector<int> params;
         params.push_back(CV_IMWRITE_JPEG_QUALITY);
         params.push_back(quality);
-        imencode(".jpg", frame, outbuf, params);
+        pthread_mutex_lock(&mutex_writer);
+        imencode(".jpg", lastFrame, outbuf, params);
+        pthread_mutex_unlock(&mutex_writer);
         int outlen = outbuf.size();
 
         pthread_mutex_lock(&mutex_client);
@@ -87,7 +85,6 @@ MJPEGWriter::Writer()
             pthread_join(threads[count-1], NULL);
             delete payloads.at(count-1);
         }
-        frame.release();
         usleep(40000);
     }
 }
@@ -101,12 +98,17 @@ MJPEGWriter::ClientWrite(clientFrame & cf)
     pthread_mutex_lock(&mutex_client);
     _write(cf.client, c_head, 0);
     int n = _write(cf.client, (char*)(cf.outbuf), cf.outlen);
-    if (n < cf.outlen)
-    {
-        cerr << "kill client " << cf.client << endl;
-        clients.erase(std::remove(clients.begin(), clients.end(), cf.client));
-        ::shutdown(cf.client, 2);
-    }
+	if (n < cf.outlen)
+	{
+    	std::vector<int>::iterator it;
+      	it = find (clients.begin(), clients.end(), cf.client);
+      	if (it != clients.end())
+      	{
+      		cerr << "kill client " << cf.client << endl;
+      		clients.erase(std::remove(clients.begin(), clients.end(), cf.client));
+            	::shutdown(cf.client, 2);
+      	}
+	}
     pthread_mutex_unlock(&mutex_client);
     pthread_exit(NULL);
 }
