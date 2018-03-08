@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/signal.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -53,7 +54,7 @@ class MJPEGWriter{
         {
         	try
         	{
-        		int retval = ::send(sock, s, len, MSG_NOSIGNAL);
+        		int retval = ::send(sock, s, len, 0x4000);
         		return retval;
         	}
         	catch (int e)
@@ -89,8 +90,9 @@ public:
     MJPEGWriter(int port = 0)
         : sock(INVALID_SOCKET)
         , timeout(TIMEOUT_M)
-        , quality(30)
+        , quality(90)
     {
+        signal(SIGPIPE, SIG_IGN);
         FD_ZERO(&master);
         if (port)
             open(port);
@@ -117,7 +119,7 @@ public:
         address.sin_addr.s_addr = INADDR_ANY;
         address.sin_family = AF_INET;
         address.sin_port = htons(port);
-        if (bind(sock, (SOCKADDR*)&address, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
+        if (::bind(sock, (SOCKADDR*)&address, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
         {
             cerr << "error : couldn't bind sock " << sock << " to port " << port << "!" << endl;
             return release();

@@ -46,7 +46,7 @@ MJPEGWriter::Listener()
                 }
             }
         }
-        usleep(10);
+        usleep(1000);
     }
 }
 
@@ -85,7 +85,7 @@ MJPEGWriter::Writer()
             pthread_join(threads[count-1], NULL);
             delete payloads.at(count-1);
         }
-        usleep(40000);
+        usleep(16666);
     }
 }
 
