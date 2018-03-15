@@ -3,7 +3,7 @@ OpenCV Video HTTP Streaming via MJPEG.
 Based on the code found in 
 [StackExchange -  CodeReview](http://codereview.stackexchange.com/questions/124321/multithreaded-mjpg-network-stream-server/156915#156915) and [Answers - OpenCV](http://answers.opencv.org/question/6976/display-iplimage-in-webbrowsers/)
 
-#Example main
+## Example main
 
 ```C++
 int main()
@@ -30,4 +30,12 @@ int main()
     exit(0);
 }
 ```
-Note that you have to write an image to the MJPEGWriter class before start the server.
+Note: you have to write an image to the MJPEGWriter class before start the server.
+
+## Compiling
+Compile with C++11, OpenCV libraries and pthread:
+
+
+```sh
+g++ MJPEGWriter.cpp main.cpp -o MJPEG -lpthread -lopencv_highgui -lopencv_core -std=c++11
+```
