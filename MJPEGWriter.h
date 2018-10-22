@@ -47,6 +47,7 @@ class MJPEGWriter{
     pthread_mutex_t mutex_cout = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_t mutex_writer = PTHREAD_MUTEX_INITIALIZER;
     Mat lastFrame;
+    int port;
 
     int _write(int sock, char *s, int len)
     {
@@ -91,11 +92,12 @@ public:
         : sock(INVALID_SOCKET)
         , timeout(TIMEOUT_M)
         , quality(90)
+	, port(port)
     {
         signal(SIGPIPE, SIG_IGN);
         FD_ZERO(&master);
-        if (port)
-            open(port);
+        // if (port)
+        //     open(port);
     }
 
     ~MJPEGWriter()
@@ -111,7 +113,7 @@ public:
         return false;
     }
 
-    bool open(int port)
+    bool open()
     {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
