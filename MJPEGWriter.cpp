@@ -5,6 +5,7 @@ MJPEGWriter::Listener()
 {
     fd_set rread;
     SOCKET maxfd;
+    this->open();
     while (true)
     {
         rread = master;
