@@ -141,6 +141,7 @@ public:
     }
 
     void start(){
+        pthread_mutex_lock(&mutex_writer);
         pthread_create(&thread_listen, NULL, this->listen_Helper, this);
         pthread_create(&thread_write, NULL, this->writer_Helper, this);
     }
