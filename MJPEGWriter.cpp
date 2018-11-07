@@ -6,6 +6,7 @@ MJPEGWriter::Listener()
     fd_set rread;
     SOCKET maxfd;
     this->open();
+    pthread_mutex_unlock(&mutex_writer);
     while (true)
     {
         rread = master;
@@ -54,6 +55,8 @@ MJPEGWriter::Listener()
 void
 MJPEGWriter::Writer()
 {
+    pthread_mutex_lock(&mutex_writer);
+    pthread_mutex_unlock(&mutex_writer);
     while (this->isOpened())
     {
         pthread_t threads[NUM_CONNECTIONS];
