@@ -20,6 +20,7 @@
 #include <pthread.h>
 #include <iostream>
 #include <stdio.h>
+#include <string.h>
 #include "opencv2/opencv.hpp"
 
 using namespace cv;
@@ -63,6 +64,20 @@ class MJPEGWriter{
         	}
         }
         return -1;
+    }
+    
+    int _read(int socket, char* buffer)
+    {
+        int result;
+        result = recv(socket, buffer, 4096, MSG_PEEK);
+        if (result < 0 )
+        {
+            cout << "An exception occurred. Exception Nr. " << result << '\n';
+            return result;
+        }
+        string s = buffer;
+        buffer = (char*) s.substr(0, (int) result).c_str();
+        return result;
     }
 
     static void* listen_Helper(void* context)
