@@ -39,3 +39,6 @@ Compile with C++11, OpenCV libraries and pthread:
 ```sh
 g++ MJPEGWriter.cpp main.cpp -o MJPEG -lpthread -lopencv_highgui -lopencv_core -std=c++11
 ```
+
+## Roadmap
+You can follow the development and request new features at https://trello.com/b/OZVtAu05
