@@ -4,14 +4,15 @@ void
 MJPEGWriter::Listener()
 {
 
-        // send http header
-        std::string header;
-        header += "HTTP/1.0 200 OK\r\n";
-        header += "Cache-Control: no-cache\r\n";
-        header += "Pragma: no-cache\r\n";
-        header += "Connection: close\r\n";
-        header += "Content-Type: multipart/x-mixed-replace; boundary=mjpegstream\r\n\r\n";
-
+	// send http header
+    std::string header;
+    header += "HTTP/1.0 200 OK\r\n";
+    header += "Cache-Control: no-cache\r\n";
+    header += "Pragma: no-cache\r\n";
+    header += "Connection: close\r\n";
+    header += "Content-Type: multipart/x-mixed-replace; boundary=mjpegstream\r\n\r\n";
+    const int header_size = header.size();
+    char* header_data = (char*)header.data();
     fd_set rread;
     SOCKET maxfd;
     this->open();
@@ -44,7 +45,7 @@ MJPEGWriter::Listener()
                     cout << headers;
                     pthread_mutex_unlock(&mutex_cout);
                     pthread_mutex_lock(&mutex_client);
-                    _write(client, (char*)header.data(), header.size());
+                    _write(client, header_data, header_size);
                     clients.push_back(client);
                     pthread_mutex_unlock(&mutex_client);
                 }
@@ -100,9 +101,9 @@ MJPEGWriter::ClientWrite(clientFrame & cf)
 {
     stringstream head;
     head << "--mjpegstream\r\nContent-Type: image/jpeg\r\nContent-Length: " << cf.outlen << "\r\n\r\n";
-    char* c_head = (char*) head.str().c_str();
+    string string_head = head.str();
     pthread_mutex_lock(&mutex_client);
-    _write(cf.client, c_head, head.str().size());
+    _write(cf.client, (char*) string_head.c_str(), string_head.size());
     int n = _write(cf.client, (char*)(cf.outbuf), cf.outlen);
 	if (n < cf.outlen)
 	{
