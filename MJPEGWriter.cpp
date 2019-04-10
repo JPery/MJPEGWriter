@@ -60,8 +60,16 @@ MJPEGWriter::Writer()
 {
     pthread_mutex_lock(&mutex_writer);
     pthread_mutex_unlock(&mutex_writer);
+    const int milis2wait = 16666;
     while (this->isOpened())
     {
+        pthread_mutex_lock(&mutex_client);
+        int num_connected_clients = clients.size();
+        pthread_mutex_unlock(&mutex_client);
+        if (!num_connected_clients) {
+            usleep(milis2wait);
+            continue;
+        }
         pthread_t threads[NUM_CONNECTIONS];
         int count = 0;
 
@@ -92,7 +100,7 @@ MJPEGWriter::Writer()
             pthread_join(threads[count-1], NULL);
             delete payloads.at(count-1);
         }
-        usleep(16666);
+        usleep(milis2wait);
     }
 }
 
