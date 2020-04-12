@@ -22,7 +22,9 @@ MJPEGWriter::Listener()
         rread = master;
         struct timeval to = { 0, timeout };
         maxfd = sock + 1;
-
+        if (sock == INVALID_SOCKET){
+        	return;
+        }
         int sel = select(maxfd, &rread, NULL, NULL, &to);
         if (sel > 0) {
             for (int s = 0; s < maxfd; s++)
