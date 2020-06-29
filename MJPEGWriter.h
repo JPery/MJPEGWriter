@@ -21,10 +21,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 
-using namespace cv;
-using namespace std;
 
 struct clientFrame {
     uchar* outbuf;
@@ -47,8 +45,10 @@ class MJPEGWriter{
     pthread_mutex_t mutex_client = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_t mutex_cout = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_t mutex_writer = PTHREAD_MUTEX_INITIALIZER;
-    Mat lastFrame;
+    cv::Mat lastFrame;
     int port;
+    std::map<std::string, std::string> authorized_users;
+    bool require_auth = false;
 
     int _write(int sock, char *s, int len)
     {
@@ -61,7 +61,7 @@ class MJPEGWriter{
         	}
         	catch (int e)
         	{
-        		cout << "An exception occurred. Exception Nr. " << e << '\n';
+        		std::cout << "An exception occurred. Exception Nr. " << e << '\n';
         	}
         }
         return -1;
@@ -73,10 +73,10 @@ class MJPEGWriter{
         result = recv(socket, buffer, 4096, MSG_PEEK);
         if (result < 0 )
         {
-            cout << "An exception occurred. Exception Nr. " << result << '\n';
+        	std::cout << "An exception occurred. Exception Nr. " << result << '\n';
             return result;
         }
-        string s = buffer;
+        std::string s = buffer;
         buffer = (char*) s.substr(0, (int) result).c_str();
         return result;
     }
@@ -111,8 +111,6 @@ public:
     {
         signal(SIGPIPE, SIG_IGN);
         FD_ZERO(&master);
-        // if (port)
-        //     open(port);
     }
 
     ~MJPEGWriter()
@@ -138,12 +136,12 @@ public:
         address.sin_port = htons(port);
         if (::bind(sock, (SOCKADDR*)&address, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
         {
-            cerr << "error : couldn't bind sock " << sock << " to port " << port << "!" << endl;
+        	std::cerr << "error : couldn't bind sock " << sock << " to port " << port << "!" << std::endl;
             return release();
         }
         if (listen(sock, NUM_CONNECTIONS) == SOCKET_ERROR)
         {
-            cerr << "error : couldn't listen on sock " << sock << " on port " << port << " !" << endl;
+        	std::cerr << "error : couldn't listen on sock " << sock << " on port " << port << " !" << std::endl;
             return release();
         }
         FD_SET(sock, &master);
@@ -167,13 +165,25 @@ public:
         pthread_join(thread_write, NULL);
     }
 
-    void write(Mat frame){
+    void write(cv::Mat frame){
     	pthread_mutex_lock(&mutex_writer);
     	if(!frame.empty()){
     		lastFrame.release();
     		lastFrame = frame.clone();
     	}
     	pthread_mutex_unlock(&mutex_writer);
+    }
+
+    void add_user(std::string user, std::string pass){
+    	authorized_users[user] = pass;
+    }
+
+    void set_require_auth(bool require_auth){
+    	this->require_auth = require_auth;
+    }
+
+    void set_quality(int quality){
+    	this->quality = quality;
     }
 
 private:
