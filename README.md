@@ -8,26 +8,29 @@ Based on the code found in
 ```C++
 int main()
 {
-    MJPEGWriter test(7777); //Creates the MJPEGWriter class to stream on the given port
+    MJPEG server(7777);
     VideoCapture cap;
-    bool ok = cap.open(0); //Opens webcam
+    bool ok = cap.open(0);
     if (!ok)
     {
-        printf("no cam found ;(.\n");
-        pthread_exit(NULL);
+        cerr << "No cam found" << endl;
+        return 1;
     }
     Mat frame;
     cap >> frame;
-    test.write(frame); //Writes a frame (Mat class from OpenCV) to the server
+    server.write(frame);
     frame.release();
-    test.start(); //Starts the HTTP Server on the selected port
-    while(cap.isOpened()){
-        cap >> frame; 
-        test.write(frame); 
+    server.start();
+    while (cap.isOpened())
+    {
+        cap >> frame;
+        server.write(frame);
         frame.release();
+        mySleep(40);
     }
-    test.stop(); //Stops the HTTP Server
-    exit(0);
+    cout << "Camera shutdown" << endl;
+    server.stop();
+    return 0;
 }
 ```
 Note: you have to write an image to the MJPEGWriter class before start the server.
@@ -37,7 +40,7 @@ Compile with C++11, OpenCV libraries and pthread:
 
 
 ```sh
-g++ MJPEGWriter.cpp main.cpp -o MJPEG -lpthread -lopencv_highgui -lopencv_core -std=c++11
+g++ MJPEGWriter.cpp main.cpp -o MJPEG -lpthread -lopencv_core -lopencv_videoio -lopencv_imgcodecs -std=c++11
 ```
 
 ## Roadmap
