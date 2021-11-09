@@ -77,7 +77,7 @@ void MJPEG::stop()
     thread_write->join();
 }
 
-void MJPEG::write(cv::Mat frame)
+void MJPEG::write(cv::Mat &frame)
 {
     mutex_writer.lock();
     if (!frame.empty())

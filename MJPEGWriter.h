@@ -66,7 +66,7 @@ public:
 
     void stop();
 
-    void write(cv::Mat frame);
+    void write(cv::Mat &frame);
 
     bool startError = true;
 

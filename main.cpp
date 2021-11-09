@@ -17,6 +17,7 @@ int main()
     //cap.set(CV_CAP_PROP_FRAME_HEIGHT, 972);
     Mat frame;
     cap >> frame;
+
     server.write(frame);
     frame.release();
     server.start();
