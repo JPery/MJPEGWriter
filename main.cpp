@@ -1,23 +1,34 @@
 #include "MJPEGWriter.h"
-int
-main()
-{
-    MJPEGWriter test(7777);
 
+using namespace std;
+using namespace cv;
+
+int main()
+{
+    MJPEG server(7777);
     VideoCapture cap;
     bool ok = cap.open(0);
     if (!ok)
     {
-        printf("no cam found ;(.\n");
-        pthread_exit(NULL);
+        cerr << "No cam found" << endl;
+        return 1;
     }
+    //cap.set(CV_CAP_PROP_FRAME_WIDTH, 1296);
+    //cap.set(CV_CAP_PROP_FRAME_HEIGHT, 972);
     Mat frame;
     cap >> frame;
-    test.write(frame);
-    frame.release();
-    test.start();
-    while(cap.isOpened()){cap >> frame; test.write(frame); frame.release();}
-    test.stop();
-    exit(0);
 
+    server.write(frame);
+    frame.release();
+    server.start();
+    while (cap.isOpened())
+    {
+        cap >> frame;
+        server.write(frame);
+        frame.release();
+        mySleep(40);
+    }
+    cout << "Camera shutdown" << endl;
+    server.stop();
+    return 0;
 }
