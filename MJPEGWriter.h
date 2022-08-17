@@ -131,6 +131,8 @@ public:
     bool open()
     {
         sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        int yes = 1;
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
         SOCKADDR_IN address;
         address.sin_addr.s_addr = INADDR_ANY;
